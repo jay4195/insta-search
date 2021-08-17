@@ -1,15 +1,16 @@
 package com.jay.instasearch.service;
 
-
-import com.jay.instasearch.pojo.SearchSchema;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.List;
-
-@Component
+@FeignClient(name = "instagram-search-provider")
 public interface SearchService {
-    @GetMapping("/search-schema/get-all-post")
+//    List<SearchSchema> getAllPost();
+
+    @RequestMapping(value = "/search-schema/get-all-post",
+            method = RequestMethod.GET)
     String getAllPost();
 }
