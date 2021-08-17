@@ -1,4 +1,4 @@
-package com.jay.instasearch.swagger;
+package com.jay.instasearch.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +21,7 @@ public class SwaggerConfig {
                 //apiInfo指定测试文档基本信息，这部分将在页面展示
                 .apiInfo(apiInfo())  //Api信息
                 .select()  //选择器
-                .apis(RequestHandlerSelectors.basePackage("com.jay.instasearch"))  //只有在这个包和子包下的接口被生成API文档
+                .apis(RequestHandlerSelectors.basePackage("com.jay.instagram"))  //只有在这个包和子包下的接口被生成API文档
                 .paths(PathSelectors.any())  //允许的路径,可以指定post
                 .build();
     }
