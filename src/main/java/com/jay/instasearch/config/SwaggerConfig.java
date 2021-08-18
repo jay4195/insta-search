@@ -29,7 +29,7 @@ public class SwaggerConfig {
     //基本信息，页面展示
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-            .title("Instagram")
+            .title("Instagram Search Service")
             .description("A Project of Instagram Clone.")
             //联系人实体类
             .contact(
