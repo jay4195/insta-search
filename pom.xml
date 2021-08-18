@@ -31,11 +31,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <artifactId>hibernate-validator</artifactId>
-            <groupId>org.hibernate.validator</groupId>
-            <version>6.2.0.Final</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>

@@ -13,8 +13,3 @@ eureka:
 spring:
   application:
     name: instagram-search-consumer
-
-mybatis:
-  mapper-locations: classpath:mybatis/*.xml
-  configuration:
-    map-underscore-to-camel-case: true

@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -81,7 +80,6 @@ public class PostSearchServiceImpl implements PostSearchService {
         log.info("Search Posts By Caption records: {}", searchResults.size());
         return searchResults;
     }
-
 
     @Override
     public List<SearchSchema> getPostsByHashtags(List<String> hashtags) {
