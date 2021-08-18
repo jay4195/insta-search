@@ -18,9 +18,7 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.Index;
 import org.elasticsearch.search.SearchHit;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -61,5 +59,21 @@ public class UpdatePostInfoController {
         return postSearchService.getAllPosts();
     }
 
+    @RequestMapping(value = "getPostByUsername/{username}",
+            method = RequestMethod.GET)
+    public Object getPostByUsername(@PathVariable(value = "username") String username) {
+        return postSearchService.getPostsByUsername(username);
+    }
 
+    @RequestMapping(value = "getPostByCaption/{caption}",
+            method = RequestMethod.GET)
+    public Object getPostByCaption(@PathVariable(value = "caption") String caption) {
+        return postSearchService.getPostByCaption(caption);
+    }
+
+    @RequestMapping(value = "getPostByHashtags",
+            method = RequestMethod.POST)
+    public Object getPostsByHashtags(@RequestBody List<String> hashtags) {
+        return postSearchService.getPostsByHashtags(hashtags);
+    }
 }
