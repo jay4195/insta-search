@@ -30,11 +30,14 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
     @Override
     public List<SearchSchema> doSearch(String searchInput) {
         JSONObject jsonObject = splitSearchInput(searchInput);
-        if (jsonObject.containsKey("username")) {
-            return postSearchService.getPostsByUsername((String) jsonObject.get("username"));
-        }
         Map<Long, SearchSchema> resultMap = new HashMap<>();
         List<SearchSchema> resultList = new LinkedList<>();
+        if (jsonObject.containsKey("username")) {
+            resultList.addAll(postSearchService.getPostsByUsername((String) jsonObject.get("username")));
+        }
+        if (resultList.size() > 0) {
+            return resultList;
+        }
         if (jsonObject.containsKey("caption")) {
             resultList.addAll(postSearchService.getPostByCaption((String) jsonObject.get("caption")));
         }
@@ -49,12 +52,10 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 
     private JSONObject splitSearchInput(String searchInput) {
         JSONObject jsonObject = new JSONObject();
-//        jsonObject.put("hashtags", new LinkedList<String>());
-//        jsonObject.put("caption", null);
-//        jsonObject.put("username", null);
         String[] queryList = searchInput.split(" ");
         if (queryList.length == 1) {
             jsonObject.put("username", queryList[0]);
+            jsonObject.put("caption", queryList[0]);
             return jsonObject;
         }
         String caption = "";

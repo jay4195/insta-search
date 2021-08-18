@@ -10,6 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.common.settings.Settings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +35,48 @@ public class UpdatePostInfoController {
 
     @Autowired
     ElasticSearchService elasticSearchService;
+
+    @RequestMapping(value = "createIndex",
+                    method = RequestMethod.GET)
+    public Object createIndex() throws IOException {
+        GetIndexRequest request = new GetIndexRequest("post-info");
+        request.local(false);
+        request.humanReadable(true);
+        request.includeDefaults(false);
+        boolean exists = elasticsearchClient.indices().exists(request, RequestOptions.DEFAULT);
+        if (exists) {
+            System.out.println("index-exist");
+            return "index-exist";
+        } else {
+            CreateIndexRequest createIndexRequest = new CreateIndexRequest("post-info");
+//            createIndexRequest.settings(Settings.builder()
+//                    .put("index.number_of_shards", 3)
+//                    .put("index.number_of_replicas", 2)
+//            );
+            Map<String, Object> caption = new HashMap<>();
+            caption.put("type", "text");
+            caption.put("analyzer", "ik_max_word");
+            Map<String, Object> hashtags = new HashMap<>();
+            hashtags.put("type", "text");
+            hashtags.put("analyzer", "ik_max_word");
+            Map<String, Object> postId = new HashMap<>();
+            postId.put("type", "long");
+            Map<String, Object> username = new HashMap<>();
+            username.put("type", "text");
+
+            Map<String, Object> properties = new HashMap<>();
+            properties.put("caption", caption);
+            properties.put("hashtags", hashtags);
+            properties.put("postId", postId);
+            properties.put("username", username);
+
+            Map<String, Object> mapping = new HashMap<>();
+            mapping.put("properties", properties);
+            createIndexRequest.mapping(mapping);
+            elasticsearchClient.indices().create(createIndexRequest, RequestOptions.DEFAULT);
+        }
+        return "done";
+    }
 
     @RequestMapping(
             method = RequestMethod.GET)
