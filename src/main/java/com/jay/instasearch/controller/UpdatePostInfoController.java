@@ -1,22 +1,15 @@
 package com.jay.instasearch.controller;
 
 
-import com.alibaba.fastjson.JSON;
-import com.jay.instasearch.pojo.Post;
+
 import com.jay.instasearch.pojo.SearchSchema;
+import com.jay.instasearch.service.ElasticSearchService;
 import com.jay.instasearch.service.PostSearchService;
 import com.jay.instasearch.service.SearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.CreateIndexRequest;
-import org.elasticsearch.common.xcontent.XContent;
-import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.Index;
-import org.elasticsearch.search.SearchHit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +28,9 @@ public class UpdatePostInfoController {
 
     @Autowired
     PostSearchService postSearchService;
+
+    @Autowired
+    ElasticSearchService elasticSearchService;
 
     @RequestMapping(
             method = RequestMethod.GET)
@@ -75,5 +71,10 @@ public class UpdatePostInfoController {
             method = RequestMethod.POST)
     public Object getPostsByHashtags(@RequestBody List<String> hashtags) {
         return postSearchService.getPostsByHashtags(hashtags);
+    }
+
+    @RequestMapping(value = "doSearch/{queryString}", method = RequestMethod.GET)
+    public Object getPostsByHashtags(@PathVariable String queryString) {
+        return elasticSearchService.doSearch(queryString);
     }
 }
