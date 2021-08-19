@@ -5,6 +5,16 @@ import com.jay.instasearch.pojo.SearchSchema;
 import java.util.List;
 
 public interface ElasticSearchService {
-    List<Long> search(String searchInput);
-    List<SearchSchema> doSearch(String searchInput);
+    boolean createIndex();
+
+    boolean updatePostInfo();
+
+    List<SearchSchema> getAllPosts();
+
+    List<SearchSchema> getPostsByHashtags(List<String> hashtags);
+
+    List<SearchSchema> getPostsByUsername(String username);
+
+    List<SearchSchema> getPostByCaption(String caption);
+
 }

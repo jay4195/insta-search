@@ -14,7 +14,7 @@ import java.util.List;
  * @author jay4195
  */
 @FeignClient(name = "instagram-search-provider")
-public interface SearchService {
+public interface RemoteSearchService {
 
     @RequestMapping(value = "/search-schema/get-all-post",
             method = RequestMethod.GET)
