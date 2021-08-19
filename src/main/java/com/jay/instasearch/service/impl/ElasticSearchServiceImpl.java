@@ -21,6 +21,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -313,6 +314,8 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         sourceBuilder.from(0);
         sourceBuilder.size(SEARCH_RESULT_COUNTS);
         sourceBuilder.timeout(new TimeValue(SEARCH_RESULT_TIMEOUT, TimeUnit.SECONDS));
+        //result order by id
+        sourceBuilder.sort("_id", SortOrder.DESC);
         sourceBuilder.query(queryBuilder);
 
         SearchRequest searchRequest = new SearchRequest(ES_INDEX_NAME);
