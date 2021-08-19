@@ -9,10 +9,7 @@ import org.elasticsearch.search.Scroll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class InstaSearchServiceImpl implements InstaSearchService {
@@ -32,7 +29,16 @@ public class InstaSearchServiceImpl implements InstaSearchService {
     @Override
     public List<SearchSchema> doSearch(String searchInput) {
         JSONObject jsonObject = splitSearchInput(searchInput);
-        Map<Long, SearchSchema> resultMap = new HashMap<>();
+        Map<Long, SearchSchema> resultMap = new TreeMap<>((o1, o2) -> {
+            //DESC
+            if (o1 < o2) {
+                return 1;
+            }
+            if (o1 > o2) {
+                return -1;
+            }
+            return 0;
+        });
         List<SearchSchema> resultList = new LinkedList<>();
         if (jsonObject.containsKey("username")) {
             resultList.addAll(elasticSearchService.getPostsByUsername((String) jsonObject.get("username")));
