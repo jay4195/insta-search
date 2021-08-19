@@ -143,7 +143,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
             addSearchHits(searchHits, esPostSet);
         }
         List<Long> esPostList = esPostSet.stream().toList();
-        System.out.println(esPostList);
+//        System.out.println(esPostList);
         ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
         clearScrollRequest.addScrollId(scrollId);
         ClearScrollResponse clearScrollResponse = null;
