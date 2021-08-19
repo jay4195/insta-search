@@ -35,7 +35,7 @@ public class KafkaConsumer {
         }
     }
 
-    @KafkaListener(topics = {"delete-post"})
+    @KafkaListener(topics = {"delete-post"}, id = "search")
     public void onDeletePost(ConsumerRecord<?, ?> record){
         String value = (String) record.value();
         Long id = Long.parseLong(value);
