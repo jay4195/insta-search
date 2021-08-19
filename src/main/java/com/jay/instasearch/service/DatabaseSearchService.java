@@ -13,8 +13,8 @@ import java.util.List;
  * OpenFeignClient 远程调用接口
  * @author jay4195
  */
-@FeignClient(name = "instagram-search-provider")
-public interface RemoteSearchService {
+@FeignClient(name = "instagram-base-server")
+public interface DatabaseSearchService {
 
     @RequestMapping(value = "/search-schema/get-all-post",
             method = RequestMethod.GET)

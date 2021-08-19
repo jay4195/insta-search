@@ -1,12 +1,13 @@
 package com.jay.instasearch.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.jay.instasearch.pojo.SearchSchema;
 import com.jay.instasearch.service.ElasticSearchService;
-import com.jay.instasearch.service.RemoteSearchService;
+import com.jay.instasearch.service.DatabaseSearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -31,21 +32,21 @@ import java.util.concurrent.TimeUnit;
 public class ElasticSearchServiceImpl implements ElasticSearchService {
     final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(1L));
 
-    private static final String SEARCH_INDICE = "post-info";
+    private static final String ES_INDEX_NAME = "post-info";
 
     private static final int SEARCH_RESULT_COUNTS = 12;
 
     private static final int SEARCH_RESULT_TIMEOUT = 60;
 
     @Autowired
-    RemoteSearchService searchService;
+    DatabaseSearchService searchService;
 
     @Autowired
     RestHighLevelClient elasticsearchClient;
 
     @Override
-    public boolean createIndex() {
-        GetIndexRequest request = new GetIndexRequest(SEARCH_INDICE);
+    public boolean createElasticsearchIndex() {
+        GetIndexRequest request = new GetIndexRequest(ES_INDEX_NAME);
         request.local(false);
         request.humanReadable(true);
         request.includeDefaults(false);
@@ -58,7 +59,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
             return false;
         }
         if (exists) {
-            DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(SEARCH_INDICE);
+            DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(ES_INDEX_NAME);
             try {
                 elasticsearchClient.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
             } catch (Exception e) {
@@ -67,7 +68,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
                 return false;
             }
         } else {
-            CreateIndexRequest createIndexRequest = new CreateIndexRequest(SEARCH_INDICE);
+            CreateIndexRequest createIndexRequest = new CreateIndexRequest(ES_INDEX_NAME);
 //            createIndexRequest.settings(Settings.builder()
 //                    .put("index.number_of_shards", 3)
 //                    .put("index.number_of_replicas", 2)
@@ -104,10 +105,10 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
     }
 
     @Override
-    public boolean updatePostInfo() {
+    public boolean updateElasticsearch() {
         HashSet<Long> esPostSet = new HashSet<>();
 
-        SearchRequest searchRequest = new SearchRequest(SEARCH_INDICE);
+        SearchRequest searchRequest = new SearchRequest(ES_INDEX_NAME);
         searchRequest.scroll(scroll);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.matchAllQuery());
@@ -149,10 +150,73 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         try {
             clearScrollResponse = elasticsearchClient.clearScroll(clearScrollRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
-            log.info("[UPDATE] clear scroll response Exception");
+            log.error("[UPDATE] clear scroll response Exception");
             e.printStackTrace();
         }
-        boolean succeeded = clearScrollResponse.isSucceeded();
+        if (clearScrollResponse.isSucceeded()) {
+            log.info("Clear Scroll Response Succeeded...");
+        } else {
+            log.warn("Clear Scroll Response Failed...");
+        }
+
+        List<SearchSchema> dbPostList = searchService.getAllPost();
+        List<SearchSchema> needAddPost = new LinkedList<>();
+
+        for (SearchSchema dbPost : dbPostList) {
+            Long cur = dbPost.getPostId();
+            if (esPostSet.contains(cur)) {
+                esPostSet.remove(cur);
+            } else {
+                needAddPost.add(dbPost);
+            }
+        }
+        if (esPostSet.isEmpty()) {
+            log.info("[Elasticsearch Update] No need to delete...");
+        } else {
+            for (Long id : esPostSet.stream().toList()) {
+                deletePostInfo(id);
+            }
+            log.info("[Elasticsearch Update] Remove Done!");
+        }
+        if (needAddPost.size() == 0) {
+            log.info("[Elasticsearch Update] No need to insert...");
+        } else {
+            for (SearchSchema schema : needAddPost) {
+                insertPostInfo(schema);
+            }
+        }
+        log.info("[ElasticSearch] insert: {} \t delete: {}", needAddPost.size(), esPostSet.size());
+        return true;
+    }
+
+    @Override
+    public boolean insertPostInfo(SearchSchema searchSchema) {
+        Map<String, Object> jsonMap = new HashMap<>();
+        jsonMap.put("postId", searchSchema.getPostId());
+        jsonMap.put("username", searchSchema.getUsername());
+        jsonMap.put("caption", searchSchema.getCaption());
+        jsonMap.put("hashtags", searchSchema.getHashtags());
+        IndexRequest indexRequest = new IndexRequest(ES_INDEX_NAME).id(searchSchema.getPostId().toString()).source(jsonMap);
+        try {
+            elasticsearchClient.index(indexRequest, RequestOptions.DEFAULT);
+        } catch (Exception e) {
+            log.warn("[Id:{}] Insert Document Error", searchSchema.getPostId());
+            return false;
+        }
+        log.info("[Id:{}] Inserted! ", searchSchema.getPostId());
+        return true;
+    }
+
+    @Override
+    public boolean deletePostInfo(Long postId) {
+        DeleteRequest request = new DeleteRequest(ES_INDEX_NAME, postId.toString());
+        try {
+            elasticsearchClient.delete(request, RequestOptions.DEFAULT);
+        } catch (Exception e) {
+            log.warn("[Id:{}] Delete Document Error", postId);
+            return false;
+        }
+        log.info("[Id:{}] removed!", postId);
         return true;
     }
 
@@ -162,20 +226,9 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         }
     }
 
-    //elastic search只返回前10条记录
     @Override
-    public List<SearchSchema> getAllPosts() {
-        SearchRequest searchRequest = new SearchRequest(SEARCH_INDICE);
-        SearchResponse searchResponse = null;
-        try {
-            searchResponse = elasticsearchClient.search(searchRequest, RequestOptions.DEFAULT);
-        } catch (Exception e) {
-            log.warn("Search All Posts Exception");
-            return null;
-        }
-        List<SearchSchema> searchResults = parseSearchResponse(searchResponse);
-        log.info("search records: {}", searchResults.size());
-        return searchResults;
+    public List<SearchSchema> getPostsFromDatabase() {
+        return searchService.getAllPost();
     }
 
     @Override
@@ -262,7 +315,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         sourceBuilder.timeout(new TimeValue(SEARCH_RESULT_TIMEOUT, TimeUnit.SECONDS));
         sourceBuilder.query(queryBuilder);
 
-        SearchRequest searchRequest = new SearchRequest(SEARCH_INDICE);
+        SearchRequest searchRequest = new SearchRequest(ES_INDEX_NAME);
         searchRequest.source(sourceBuilder);
         SearchResponse searchResponse = null;
         try {
