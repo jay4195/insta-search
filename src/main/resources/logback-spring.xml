@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <property name="LOGS" value="./logs" />
+
+    <appender name="Console"
+              class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+<!--            <Pattern>-->
+<!--                %yellow(%d{yyyy-MM-dd HH:mm:ss.SSS}) [%highlight(%-5level)] [%green(%t)] %yellow(%C{1.}): %msg%n%throwable-->
+<!--            </Pattern>-->
+<!--            <Pattern>-->
+<!--                %cyan(%d{yyyy-MM-dd HH:mm:ss.SSS}) %highlight(%-5level) %magenta([%15.15thread]) %cyan(%logger{10}.%M :) %msg%n-->
+<!--            </Pattern>-->
+<!--        <Pattern>-->
+<!--            %cyan(%d{yyyy-MM-dd HH:mm:ss.SSS}) %highlight(%-5level) %magenta([%15.15thread]) %cyan(%logger{10}.%M :) %msg%n-->
+<!--        </Pattern>-->
+        <Pattern>
+            %cyan(%d{yyyy-MM-dd HH:mm:ss.SSS}) %highlight(%-5level) %magenta([%-15.15thread]) %cyan(%-50.-50(%logger{10}) :) %msg%n
+        </Pattern>
+        </layout>
+    </appender>
+
+    <appender name="RollingFile"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/instasearch-logger.log</file>
+        <encoder
+                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--            <Pattern>%d [%p] Thread:[%t] [%C{1.}] %m%n</Pattern>-->
+            <!--            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5p] [%15.15t] [%c{2}] -&#45;&#45; %m%n</Pattern>-->
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5p] [%-15.15t] [%-50.-50(%logger{35})] --- %m%n</Pattern>
+        </encoder>
+
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover daily and when the file reaches 10 MegaBytes -->
+            <fileNamePattern>${LOGS}/archived/instasearch-logger-%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <!-- LOG everything at INFO level -->
+    <root level="info">
+        <appender-ref ref="RollingFile" />
+        <appender-ref ref="Console" />
+    </root>
+
+    <!-- LOG "com.netflix.*" at warn level -->
+    <logger name="com.netflix" level="warn" additivity="false">
+        <appender-ref ref="RollingFile" />
+        <appender-ref ref="Console" />
+    </logger>
+    <!-- LOG "org.apache.kafka.*" at warn level -->
+    <logger name="org.apache.kafka" level="warn" additivity="false">
+        <appender-ref ref="RollingFile" />
+        <appender-ref ref="Console" />
+    </logger>
+
+</configuration>

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jay.instasearch.pojo.SearchSchema;
 import com.jay.instasearch.service.InstaSearchService;
 import com.jay.instasearch.service.ElasticSearchService;
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.search.Scroll;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
+@Slf4j
 public class InstaSearchServiceImpl implements InstaSearchService {
     @Autowired
     ElasticSearchService elasticSearchService;
@@ -55,6 +57,7 @@ public class InstaSearchServiceImpl implements InstaSearchService {
         for (SearchSchema schema : resultList) {
             resultMap.putIfAbsent(schema.getPostId(), schema);
         }
+        log.info("[Search Done] search: [{}] {} results", searchInput,resultMap.size());
         return resultMap.values().stream().toList();
     }
 
