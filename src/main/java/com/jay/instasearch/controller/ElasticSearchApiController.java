@@ -54,7 +54,7 @@ public class ElasticSearchApiController {
     }
 
     @RequestMapping(value = "doSearch/{queryString}", method = RequestMethod.GET)
-    public Object getPostsByHashtags(@PathVariable String queryString) {
+    public Object doSearch(@PathVariable String queryString) {
         return instaSearchService.doSearch(queryString);
     }
 

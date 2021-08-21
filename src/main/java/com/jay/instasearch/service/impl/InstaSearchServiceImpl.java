@@ -64,19 +64,20 @@ public class InstaSearchServiceImpl implements InstaSearchService {
     private JSONObject splitSearchInput(String searchInput) {
         JSONObject jsonObject = new JSONObject();
         String[] queryList = searchInput.split(" ");
+        List<String> hashtags = new LinkedList<>();
         if (queryList.length == 1) {
             if (queryList[0].startsWith("#")) {
-                List<String> hashtags = new LinkedList<>();
                 hashtags.add(queryList[0]);
                 jsonObject.put("hashtags", hashtags);
             } else {
                 jsonObject.put("username", queryList[0]);
                 jsonObject.put("caption", queryList[0]);
+                hashtags.add("#" + queryList[0]);
+                jsonObject.put("hashtags", hashtags);
             }
             return jsonObject;
         }
         String caption = "";
-        List<String> hashtags = new LinkedList<>();
         StringBuilder captionBuilder = new StringBuilder();
         for (String query : queryList) {
             if (query.startsWith("#")) {
@@ -87,6 +88,7 @@ public class InstaSearchServiceImpl implements InstaSearchService {
                 } else {
                     captionBuilder.append(" ").append(query);
                 }
+                hashtags.add("#" + query);
             }
         }
         if (!captionBuilder.isEmpty()) {

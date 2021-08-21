@@ -15,9 +15,12 @@
 <!--        <Pattern>-->
 <!--            %cyan(%d{yyyy-MM-dd HH:mm:ss.SSS}) %highlight(%-5level) %magenta([%15.15thread]) %cyan(%logger{10}.%M :) %msg%n-->
 <!--        </Pattern>-->
-        <Pattern>
-            %cyan(%d{yyyy-MM-dd HH:mm:ss.SSS}) %highlight(%-5level) %magenta([%-15.15thread]) %cyan(%-50.-50(%logger{10}) :) %msg%n
-        </Pattern>
+<!--        <Pattern>-->
+<!--            %cyan(%d{yyyy-MM-dd HH:mm:ss.SSS}) %highlight(%-5level) %magenta([%-15.15thread]) %cyan(%-50.-50(%logger{10}) :) %msg%n-->
+<!--        </Pattern>v-->
+            <Pattern>
+                %cyan(%d{yyyy-MM-dd HH:mm:ss.SSS}) %highlight(%-5level) %magenta([%-15.15thread]) %yellow(%C{1.}:) %msg%n
+            </Pattern>v
         </layout>
     </appender>
 
@@ -56,6 +59,10 @@
     </logger>
     <!-- LOG "org.apache.kafka.*" at warn level -->
     <logger name="org.apache.kafka" level="warn" additivity="false">
+        <appender-ref ref="RollingFile" />
+        <appender-ref ref="Console" />
+    </logger>
+    <logger name="org.apache.kafka.clients.NetworkClient" level="error" additivity="false">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
     </logger>
