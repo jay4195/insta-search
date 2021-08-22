@@ -22,7 +22,7 @@ public class KafkaConsumer {
     @Autowired
     ElasticSearchService elasticSearchService;
     // 消费监听
-    @KafkaListener(topics = {"post-after"})
+    @KafkaListener(topics = {"post-after"}, id = "search")
     public void onPost(ConsumerRecord<?, ?> record){
         Post post = JSON.parseObject((String) record.value(), Post.class);
         log.info("[Kafka Listener] on Post id: {}", post.getId());
