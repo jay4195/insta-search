@@ -20,7 +20,7 @@
 <!--        </Pattern>v-->
             <Pattern>
                 %cyan(%d{yyyy-MM-dd HH:mm:ss.SSS}) %highlight(%-5level) %magenta([%-15.15thread]) %yellow(%C{1.}:) %msg%n
-            </Pattern>v
+            </Pattern>
         </layout>
     </appender>
 

@@ -22,7 +22,7 @@ public class KafkaConsumer {
     @Autowired
     ElasticSearchService elasticSearchService;
     // 消费监听
-    @KafkaListener(topics = {"post-after"}, id = "search")
+    @KafkaListener(topics = {"post-after"}, id = "search-onpost")
     public void onPost(ConsumerRecord<?, ?> record){
         Post post = JSON.parseObject((String) record.value(), Post.class);
         log.info("[Kafka Listener] on Post id: {}", post.getId());
@@ -35,7 +35,7 @@ public class KafkaConsumer {
         }
     }
 
-    @KafkaListener(topics = {"delete-post"}, id = "search")
+    @KafkaListener(topics = {"delete-post"}, id = "search-ondelete")
     public void onDeletePost(ConsumerRecord<?, ?> record){
         String value = (String) record.value();
         Long id = Long.parseLong(value);
